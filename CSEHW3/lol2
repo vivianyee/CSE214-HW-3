@@ -16,7 +16,7 @@ def matrix_multiply(a, b, n):
             # Store dot product of a[i][:] with
             # b[:][j] in c[i][j]. 
             for k in N:
-                
+
                 c[i][j] += a[i][k]*b[k][j]
 
     # Return the matrix.

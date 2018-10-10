@@ -17,6 +17,10 @@ public class Complexity {
 			return("O(n"+" * log(n))");
 		}else if(nPower==0 && logPower==0){
 			return("O(1)");
+		}else if(logPower == 0){
+			return("O(n^"+nPower+")");
+		}else if(nPower == 0) {
+			return("O(log(n)^"+logPower+")");
 		}else {
 			return("O(n^"+nPower+" * log(n)^"+logPower+")");
 		}

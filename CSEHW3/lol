@@ -25,5 +25,5 @@ def test_function(n):
         k /= 2 
 
     print("Since n * log(n) is bigger complexity, the whole "
-          "funtion is O(n * log(n).")
+          "function is O(n * log(n).")
 
