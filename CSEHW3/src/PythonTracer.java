@@ -2,24 +2,44 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 import java.io.*;
-
+/**
+ * The <code>PythonTracer</code> class goes through
+ * the file and determines the order of complexity
+ * 
+ * @author Vivian Yee
+ * 		e-mail: vivian.yee@stonybrook.edu
+ * 		Stonybrook ID: 112145534
+ */
 public class PythonTracer {
-	public static final int SPACE_COUNT = 4;
-	static ArrayList<CodeBlock> dude = new ArrayList<CodeBlock>();
-	static String count = "1";
-	static boolean isithigher = false;
+	public static final int SPACE_COUNT = 4; // indents in the code for every statement
+	static ArrayList<CodeBlock> dude = new ArrayList<CodeBlock>(); // stack of CodeBlocks
+	static String count = "1"; // name of the CodeBlocks
 	
+	/**
+	 * Asks user for the file
+	 * 
+	 * @param args
+	 * @throws IOException
+	 */
 	public static void main(String[] args) throws IOException {
 		BufferedReader scan = new BufferedReader(new InputStreamReader(System.in));
 		System.out.println("Please enter a file name (or 'quit' to quit): ");
 		String x = scan.readLine();
 		if(x.equalsIgnoreCase("quit")) {
 			System.exit(0);
-		}else {
+		}else{
 			System.out.println("Overall complexity of matrix_multiply: " + traceFile(x).toString());
 		}
 	}
 	
+	/**
+	 * determines complexity of code given
+	 * 
+	 * @param filename
+	 * 		the name of the file provided by the user
+	 * @return
+	 * 		the total order of complexity of the file
+	 */
 	public static Complexity traceFile(String filename) {
 		CodeBlock oldTop = null;
 		Complexity oldTopComplexity = null;
@@ -27,7 +47,6 @@ public class PythonTracer {
 		Complexity highestofthehigh = new Complexity(0,0);
 		Boolean whatintarnation = true;
 		Boolean firsttime = false;
-		
 		String top = "";
 		try {
 			File file = new File(filename);
@@ -42,50 +61,41 @@ public class PythonTracer {
 			        	spaces+=4;
 			        }
 	        	}
-	        	
-	        	System.out.println(x[spaces]);
-	        	// FINDS THE FIRST DANG THING - WORKS!
 		        if(!((x[spaces].equals("#"))||(z.trim().equals("")))) {
 		        	int indents = spaces / SPACE_COUNT;
-		        	while(indents<dude.size()) { //while indents is less than size of stack
+		        	while(indents<dude.size()) { 
 		        		if(indents == 0) {
 		        			return highestofthehigh;
-		        		}else if(firsttime){ // what happens in other times
+		        		}else if(firsttime){
 		        			oldTop = BlockStack.pop();
-		        			System.out.println(dude.size());
-		        			System.out.println(BlockStack.peek().getName());
-		        			System.out.println(oldTop.getName());
+		        			System.out.println("Leaving block "+oldTop.getName()+" updating block "+BlockStack.peek().getName());
 		        			oldTopComplexity = oldTop.getHighestSubComplexity();
-		        			System.out.println("nani");
-		        			System.out.println(oldTopComplexity.toString()+"?");
-		        			System.out.println(BlockStack.peek().getBlockComplexity().toString());
+		        			System.out.println("BLOCK "+BlockStack.peek().getName()+":   "
+			        				+"block complexity = "+BlockStack.peek().getBlockComplexity().toString()
+			        				+"   highest sub-complexity = "+oldTopComplexity.toString());
 		        			compare(oldTopComplexity,BlockStack.peek().getBlockComplexity());
-		        			if(nani(highestofthehigh,BlockStack.peek().getHighestSubComplexity())) {
+		        			if(compare2(highestofthehigh,BlockStack.peek().getHighestSubComplexity())) {
 		        				highestofthehigh = BlockStack.peek().getHighestSubComplexity();
 		        			}
-		        			System.out.println(BlockStack.peek().getHighestSubComplexity().toString());
-		        		}else { // what happens in the first time
+		        			System.out.println("\n");
+		        		}else {
 		        			oldTop = BlockStack.pop();
-		        			System.out.println(dude.size());
-		        			System.out.println(BlockStack.peek().getName());
-		        			System.out.println(oldTop.getName());
+		        			System.out.println("Leaving block "+oldTop.getName()+" updating block "+BlockStack.peek().getName());
 		        			oldTopComplexity = oldTop.getBlockComplexity();
-		        			System.out.println("nani 1");
-		        			System.out.println(oldTopComplexity.toString()+"?");
-		        			System.out.println(BlockStack.peek().getBlockComplexity().toString());
 		        			BlockStack.peek().setHighestSubComplexity(oldTopComplexity);
-		        			System.out.println(BlockStack.peek().getHighestSubComplexity().toString());
+		        			System.out.println("BLOCK "+BlockStack.peek().getName()+":   "
+			        				+"block complexity = "+BlockStack.peek().getBlockComplexity().toString()
+			        				+"   highest sub-complexity = "+BlockStack.peek().getHighestSubComplexity().toString());
 		        			compare(oldTopComplexity,BlockStack.peek().getBlockComplexity());
-		        			if(nani(highestofthehigh,BlockStack.peek().getHighestSubComplexity())) {
+		        			if(compare2(highestofthehigh,BlockStack.peek().getHighestSubComplexity())) {
 		        				highestofthehigh = BlockStack.peek().getHighestSubComplexity();
 		        			}
-		        			System.out.println(BlockStack.peek().getHighestSubComplexity().toString());
+		        			System.out.println("\n");
 		        		}
 		        		whatintarnation = true;
 		        		firsttime=true;
 		        	}
 		        	firsttime=false;
-		        	// MAKES KEYWORD THE KEYWORD IN BLOCK_TYPES - WORKS!
 		        	String keyword = "yo";
 		        	String huh = x[spaces]+" ";
 		        	for(int i = 0; i<CodeBlock.BLOCK_TYPES.length; i++) {
@@ -93,50 +103,53 @@ public class PythonTracer {
 		        			 keyword = huh;
 		        		}
 		        	}
-		        	System.out.println(keyword+"keyword");
-		        	
-		        	// IF KEYWORD DOES NOT EQUAL NOTHING - WORKS!
 		        	if(!keyword.equals("yo")) {
-		        		
-		        		// IF KEYWORD IS FOR - WORKS!
 			        	if(keyword.equals("for ")) {
-			        		System.out.println(" inside for");
 			        		for(int y = 0; y < x.length; y++) {
-			        			if(x[y].equals("N:")){//if keyword is "for"
+			        			if(x[y].equals("N:")){
 			        				Complexity comp1 = new Complexity(1,0);
 			        				CodeBlock block = new CodeBlock(comp1);
 			        				BlockStack.push(block);
+			        				dude.get(0).setName(count);
+			        				count = count+".1";
 			        				if(whatintarnation) {
 			        					highest = BlockStack.peek().getBlockComplexity();
 			        					whatintarnation = false;
 			        				}
 			        				BlockStack.peek().setHighestSubComplexity(highest);
-			        				System.out.println(BlockStack.peek().getBlockComplexity().toString());
-			        				dude.get(0).setName("for hate this class N");
+			        				System.out.println("Entering block "+BlockStack.peek().getName()+" "+
+					        				x[spaces]+":");
+					        		System.out.println("BLOCK "+BlockStack.peek().getName()+":   "
+					        				+"block complexity = "+BlockStack.peek().getBlockComplexity().toString()
+					        				+"   highest sub-complexity = "+BlockStack.peek().getHighestSubComplexity().toString());
+					        		System.out.print("\n");
 			        			}else if(x[y].equals("log_N:")) {
 			        				Complexity comp2 = new Complexity(0,1);
 			        				CodeBlock block = new CodeBlock(comp2);
 			        				BlockStack.push(block);
+			        				dude.get(0).setName(count);
+			        				count = count+".1";
 			        				if(whatintarnation) {
 			        					highest = BlockStack.peek().getBlockComplexity();
 			        					whatintarnation = false;
 			        				}
 			        				BlockStack.peek().setHighestSubComplexity(highest);
-			        				System.out.println(BlockStack.peek().getBlockComplexity().toString());
-			        				dude.get(0).setName("for hate this class LOG");
+			        				System.out.println("Entering block "+BlockStack.peek().getName()+" "+
+					        				x[spaces]+":");
+					        		System.out.println("BLOCK "+BlockStack.peek().getName()+":   "
+					        				+"block complexity = "+BlockStack.peek().getBlockComplexity().toString()
+					        				+"   highest sub-complexity = "+BlockStack.peek().getHighestSubComplexity().toString());
+					        		System.out.print("\n");
 			        			}
 			        		}
 			        		top = "for ";
-			        		System.out.println(BlockStack.peek().getName());
-			        	
-			        	// IF KEYWORD IS WHILE - NO WORK 
-			        	}else if(keyword.equals("while ")) {//else if keyword is "while"
-			        		System.out.println(" inside while");
+			        	}else if(keyword.equals("while ")) {
 			        		String loops = x[spaces+1];
 			        		Complexity temps = new Complexity(0,0);
 			        		CodeBlock block = new CodeBlock(temps);
 			        		BlockStack.push(block);
-			        		dude.get(0).setName("while hate this class");
+			        		dude.get(0).setName(count);
+	        				count = count+".1";
 			        		BlockStack.peek().setLoopVariable(loops);
 			        		top = "while";
 			        		if(whatintarnation) {
@@ -144,69 +157,64 @@ public class PythonTracer {
 	        					whatintarnation = false;
 			        		}
 			        		BlockStack.peek().setHighestSubComplexity(highest);
-			        		System.out.println(BlockStack.peek().getBlockComplexity().toString());
-			        		System.out.println(BlockStack.peek().getName());;
-			        	
-			        	// IF KEYWORD IS NEITHER - NO WORK
+			        		System.out.println("Entering block "+BlockStack.peek().getName()+" "+
+			        				x[spaces]+":");
+			        		System.out.println("BLOCK "+BlockStack.peek().getName()+":   "
+			        				+"block complexity = "+BlockStack.peek().getBlockComplexity().toString()
+			        				+"   highest sub-complexity = "+BlockStack.peek().getHighestSubComplexity().toString());
+			        		System.out.print("\n");
 			        	} else {
-			        		System.out.println(" inside something ");
 			        		Complexity temps = new Complexity(0,0);
 			        		CodeBlock block = new CodeBlock(temps);
 			        		BlockStack.push(block);
-			        		dude.get(0).setName("i hate this class");
+			        		dude.get(0).setName(count);
+			        		count = count + ".1";
 			        		top = "something";
 			        		if(whatintarnation) {
 	        					highest = BlockStack.peek().getBlockComplexity();
 	        					whatintarnation = false;
 			        		}
 			        		BlockStack.peek().setHighestSubComplexity(highest);
-			        		System.out.println(BlockStack.peek().getBlockComplexity().toString());
-			        		System.out.println(BlockStack.peek().getName());
+			        		System.out.println("Entering block "+BlockStack.peek().getName()+" "+
+			        				x[spaces]+":");
+			        		System.out.println("BLOCK "+BlockStack.peek().getName()+":   "
+			        				+"block complexity = "+BlockStack.peek().getBlockComplexity().toString()
+			        				+"   highest sub-complexity = "+BlockStack.peek().getHighestSubComplexity().toString());
+			        		System.out.print("\n");
 			        	}
 			        	
-			        // IF KEYWORD IS AFFECTING WHILE LOOP - NO WORK
 		        	}else {
-		        		System.out.println(" useless");
-		        		System.out.println(BlockStack.peek().getLoopVariable());
 			        	String keyword1 = "yo";
 			        	for(int i = 0; i<x.length; i++) {
 			        		if(x[i].equals(BlockStack.peek().getLoopVariable())) {
 			        			 keyword1 = x[i];
 			        		}
 			        	}
-			        	System.out.println(keyword1);
-			        	
-			        	// why this not work??? WHAT THE FUCK
 			        	Complexity ah = null;
 		        		if(top.equals("while")) {
-		        			System.out.println("while????");
 		        			if(BlockStack.peek().getLoopVariable()!=null) {
-			        			if(BlockStack.peek().getLoopVariable().equals(keyword1)) { // fix
-			        				System.out.print(" maybe not useless");
-			        				System.out.println(x[spaces+2]);
+			        			if(BlockStack.peek().getLoopVariable().equals(keyword1)) {
 			        				for(int i = 0; i<x.length; i++) {
 						        		if((x[i].equals("/="))||(x[i].equals("+="))) {
 						        			 keyword1 = x[i];
 						        		}
 						        	}
-			        				System.out.println(keyword1);
 			        				if(keyword1.equals("/=")) {
-			        					System.out.println(" maybe not useless1");
 			        					ah = new Complexity(0,1);
 			        				}else if(keyword1.equals("+=")) {
-			        					System.out.println(" maybe not useles2s");
 			        					ah = new Complexity(1,0);
 			        				}
 			        				BlockStack.peek().setBlockComplexity(ah);
-			        				System.out.println(BlockStack.peek().getBlockComplexity().toString());
+			        				System.out.println("Found update statement, updating block "+BlockStack.peek().getName());
+			        				System.out.println("BLOCK "+BlockStack.peek().getName()+":   "
+					        				+"block complexity = "+BlockStack.peek().getBlockComplexity().toString()
+					        				+"   highest sub-complexity = "+BlockStack.peek().getHighestSubComplexity().toString());
+					        		System.out.print("\n");
 			        				top = "nothing fool";
 			        			}
 		        			}
 			        	}
 		        	}
-		        	System.out.println(top);
-		        	System.out.println(BlockStack.peek().getHighestSubComplexity().toString());
-		        	System.out.print(dude.size()+"\n\n");
 		        	
 		        }
 		    }
@@ -220,49 +228,38 @@ public class PythonTracer {
 		} catch (IOException e) {
 		    e.printStackTrace();
 		}
-		// idk about this
 	    return highestofthehigh;
 	}
 	
-	// old top compared to now top
+	/**
+	 * compares the complexity and replaces highest complexity with the combination of both
+	 * 
+	 * @param x
+	 * 		oldTopComplexity
+	 * @param y
+	 * 		the now TopComplexity
+	 */
 	public static void compare(Complexity x, Complexity y) {
-//		if(x.getnPower()>y.getnPower()) {
-//			if(x.getLogPower()<y.getLogPower()) {
-//				System.out.println("1 lmfao");
-//				BlockStack.peek().getHighestSubComplexity().setnPower(x.getnPower()+y.getnPower());
-//			}
-//		}else if(x.getLogPower()>y.getLogPower()) {
-//			if(x.getnPower()<y.getnPower()) {
-//				System.out.println("2 lmfao");
-//				BlockStack.peek().getHighestSubComplexity().setLogPower(x.getLogPower()+y.getLogPower());
-//			}
-//		}else if(x.getLogPower()>y.getLogPower()) {
-//			if(x.getnPower()>y.getnPower()) {
-//				System.out.println("3 lmfao");
-//				BlockStack.peek().setHighestSubComplexity(x);
-//			}
-//		}else if((x.getnPower()>=highest.getnPower())&&(y.getLogPower()>=highest.getLogPower())){
-//			System.out.println("4 lmfao");
-//			BlockStack.peek().setHighestSubComplexity(x);
-//			System.out.println(highest.toString());
-//		}
 		Complexity yeo = new Complexity(x.getnPower()+y.getnPower(),x.getLogPower()+y.getLogPower());
 		BlockStack.peek().setHighestSubComplexity(yeo);
 	}
 	
-//	YO IM NOT FUKING DONE WITH THIS	
-	// VERY FUKING IMPORTATN
-	// WORK TOMORROW PLEASE
-	// THIS MAD GAY
-	// DONT FAIL
-	public static boolean nani(Complexity x, Complexity y) {
+	/**
+	 * Compare if the highest complexity is lower or higher than the top complexity
+	 * @param x
+	 * 		highest of the high complexity
+	 * @param y
+	 * 		top complexity of the array list
+	 * @return
+	 * 		true or false if the top complexity of the array list is higher
+	 * 		than the highest of the high complexity
+	 */
+	public static boolean compare2(Complexity x, Complexity y) {
 			if(x.getnPower()<=y.getnPower()) {
 				if(x.getLogPower()<=y.getLogPower()) {
-					System.out.println("it is indeed t");
 					return true;
 				}
 			}
-		System.out.println("it is indeed f");
 		return false;
 	}
 }
